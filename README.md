@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="your_image.png" alt="Your Image" width="150px">
+    <img src="python-logo.png" alt="Your Image" width="150px">
 </p>
 
 <p align="center">
@@ -9,8 +9,8 @@
     <a href="https://pypi.org/project/your-python-package/">
         <img src="https://img.shields.io/pypi/dm/influxdb3-python-cli.svg" alt="PyPI downloads">
     </a>
-    <a href="https://github.com/InfluxCommunity/influxdb3-python-cli/actions/workflows/linter.yml">
-        <img src="https://github.com/InfluxCommunity/influxdb3-python-cli/actions/workflows/linter.yml/badge.svg" alt="Lint Code Base">
+    <a href="https://github.com/InfluxCommunity/influxdb3-python-cli/actions/workflows/pylint.yml">
+        <img src="https://github.com/InfluxCommunity/influxdb3-python-cli/actions/workflows/pylint.yml/badge.svg" alt="Lint Code Base">
     </a>
     <a href="https://app.slack.com/huddle/influxcommunity/">
         <img src="https://img.shields.io/badge/slack-join_chat-white.svg?logo=slack&style=social" alt="Community Slack">
