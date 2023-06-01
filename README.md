@@ -6,7 +6,7 @@
     <a href="https://pypi.org/project/influxdb3-python-cli/">
         <img src="https://img.shields.io/pypi/v/influxdb3-python-cli.svg" alt="PyPI version">
     </a>
-    <a href="https://pypi.org/project/your-python-package/">
+    <a href="https://pypi.org/project/influxdb3-python-cli/">
         <img src="https://img.shields.io/pypi/dm/influxdb3-python-cli.svg" alt="PyPI downloads">
     </a>
     <a href="https://github.com/InfluxCommunity/influxdb3-python-cli/actions/workflows/pylint.yml">
