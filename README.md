@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="python-logo.png" alt="Your Image" width="150px">
+    <img src="https://github.com/InfluxCommunity/influxdb3-python-cli/blob/main/python-logo.png?raw=true" alt="Your Image" width="150px">
 </p>
 
 <p align="center">
@@ -15,7 +15,7 @@
         <a href="https://github.com/InfluxCommunity/influxdb3-python-cli/actions/workflows/python-publish.yml">
         <img src="https://github.com/InfluxCommunity/influxdb3-python-cli/actions/workflows/python-publish.yml/badge.svg" alt="Lint Code Base">
     </a>
-    <a href="https://app.slack.com/huddle/influxcommunity/">
+    <a href="https://influxcommunity.slack.com">
         <img src="https://img.shields.io/badge/slack-join_chat-white.svg?logo=slack&style=social" alt="Community Slack">
     </a>
 </p>
