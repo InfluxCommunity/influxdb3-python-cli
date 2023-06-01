@@ -22,19 +22,13 @@
 
 # influxdb3-python-cli
 ## About
-This repository contains an extention to the influxdb 3.0 python client libary. While this code is built on officially supported APIs, the library and CLI here are not officially support by Influx Data. 
+This repository contains a CLI extention to the influxdb 3.0 python client libary. While this code is built on officially supported APIs, the library and CLI here are not officially support by Influx Data. 
 
 ## Install
-To install only the client:
+To install only the cli:
 
 ```bash
-python3 -m pip install pyinflux3
-```
-
-To install the client and CLI:
-
-```bash
-sudo python3 -m pip install "pyinflux3[cli]"
+python3 -m pip install influxdb3-python-cli
 ```
 
 ***Note: Use sudo if you would like to directly install the client onto your path. Otherwise use the `--user` flag.**
