@@ -22,10 +22,10 @@
 
 # influxdb3-python-cli
 ## About
-This repository contains a CLI extention to the influxdb 3.0 python client libary. While this code is built on officially supported APIs, the library and CLI here are not officially support by Influx Data. 
+This repository contains a CLI extension to the [influxdb 3.0 python client library](https://github.com/InfluxCommunity/influxdb3-python). While this code is built on officially supported APIs, the library and CLI here are not officially support by InfluxData. 
 
 ## Install
-To install only the cli:
+To install the CLI, enter the following command in your terminal:
 
 ```bash
 python3 -m pip install influxdb3-python-cli
@@ -33,28 +33,13 @@ python3 -m pip install influxdb3-python-cli
 
 ***Note: Use sudo if you would like to directly install the client onto your path. Otherwise use the `--user` flag.**
 
-## Add a Config
+## Add a config
 
-To configure `pyinflux3` and the CLI, do one of the following:
+To configure the CLI, do _one_ of the following:
 
-You can drop a config file called `config.json` in the directory where you are running the `influx3` command:
+- Use the `influx3 config` command to create or modify config--for example:
 
-```json
-{
-    "my-config": {
-        "database": "your-database",
-        "host": "your-host",
-        "token": "your-token",
-        "org": "your-org-id",
-        "active": true
-    }
-}
-```
-
-
-- Use the `config` command to create or modify a config:
-
-    ```
+    ```bash
     influx3 config \
     --name="my-config" \
     --database="<database or bucket name>" \
@@ -62,10 +47,26 @@ You can drop a config file called `config.json` in the directory where you are r
     --token="<your token>" \
     --org="<your org ID>"
     ```
+    
+  The output is the configuration in a `config.json` file.
 
-If you are running against InfluxDB Cloud Serverless, then use the _bucket name_ as the database in your configuration.
+- In your editor, create or edit the `config.json` file, and then save it to the directory where you're using the `influx3` command--for example:
 
-## Run as a Command
+    ```json
+    {
+        "my-config": {
+            "database": "your-database",
+            "host": "your-host",
+            "token": "your-token",
+            "org": "your-org-id",
+            "active": true
+        }
+    }
+    ```
+
+If you're running the CLI against InfluxDB Cloud Serverless, replace `your-database` in the examples with your Cloud Serverless _bucket name_.
+
+## Run as a command
 
 ```
 influx3 sql "select * from anomalies"
@@ -75,7 +76,7 @@ influx3 sql "select * from anomalies"
 influx3 write testmes f=7 
 ```
 
-## Query and Write Interactively
+## Query and write interactively
 
 In your terminal, enter the following command:
 
@@ -127,22 +128,33 @@ home,room=kitchen temp=70.5,hum=80
 
 To exit a prompt, enter `exit`.
 
-## Write from a File
+## Write from a file
 
-Both the InfluxDB CLI and Client libary support writing from a CSV file. The CSV file must have a header row with the column names. The there must be a column containing a timestamp. Here are the parse options:
+The InfluxDB CLI and client library can write data from a CSV file.
+The CSV file must contain the following:
+
+- A header row with column names
+- A column that contains a timestamp for each row
+
+The following CLI options specify how data is parsed:
+
 * `--file` - The path to the csv file.
 * `--time` - The name of the column containing the timestamp.
 * `--measurement` - The name of the measurment to store the CSV data under. (Currently only supports user specified string)
 * `--tags` - (optional) Specify an array of column names to use as tags. (Currently only supports user specified strings) for example: `--tags=host,region`
+
+The following example shows how to write CSV data from a `./Examples/example.csv` file to InfluxDB (as line protocol):
 
 ```bash
 influx3 write_csv --file ./Examples/example.csv --measurement table2 --time Date --tags host,region
 ```
 
 ## Client library
-The underlining client library is also available for use in your own code: https://github.com/InfluxCommunity/influxdb3-python
+
+The underlying client library is also available for use in your own code: https://github.com/InfluxCommunity/influxdb3-python
 
 ## Contribution
-If you are working on a new feature for either the CLI or the Client Libary please make sure you test both for breaking changes. 
+
+When developing a new feature for the CLI or the client library, make sure to test your feature in both for breaking changes.
 
 #
