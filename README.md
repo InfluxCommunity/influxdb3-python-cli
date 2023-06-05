@@ -143,7 +143,7 @@ The following CLI options specify how data is parsed:
 * `--measurement` - The name of the measurment to store the CSV data under. (Currently only supports user specified string)
 * `--tags` - (optional) Specify an array of column names to use as tags. (Currently only supports user specified strings) for example: `--tags=host,region`
 
-The following example shows how to write CSV data from a `./Examples/example.csv` file to InfluxDB (as line protocol):
+The following example shows how to write CSV data from the [`./Examples/example.csv` file](https://github.com/InfluxCommunity/influxdb3-python/blob/main/Examples/example.csv) to InfluxDB (as line protocol):
 
 ```bash
 influx3 write_csv --file ./Examples/example.csv --measurement table2 --time Date --tags host,region
