@@ -31,7 +31,14 @@ To install the CLI, enter the following command in your terminal:
 python3 -m pip install influxdb3-python-cli
 ```
 
-***Note: Use sudo if you would like to directly install the client onto your path. Otherwise use the `--user` flag.**
+
+### Scope and privileges
+
+Python provides the following methods for installing packages within a specific scope:
+
+- To isolate the CLI (and its dependencies) to your project directory, install the CLI in a _virtual environment_. [See how to create and use a `venv` or `conda` Python virtual environment](https://docs.influxdata.com/influxdb/cloud-serverless/query-data/execute-queries/flight-sql/python/#create-a-python-virtual-environment).
+- To install the client to a user-specific directory (without administrative rights), pass the `--user` flag in the `pip` command.
+- To install the client in your system-wide path, use `sudo` with admin privileges.
 
 ## Add a config
 
