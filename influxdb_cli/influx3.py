@@ -2,7 +2,6 @@
 
 import cmd, ast
 import argparse
-from flightsql import FlightSQLClient
 import json
 from prompt_toolkit import PromptSession
 from prompt_toolkit.lexers import PygmentsLexer
@@ -40,6 +39,16 @@ class IOXCLI(cmd.Cmd):
             return
         try: 
             table = self.influxdb_client.query(query=arg, language="sql")
+            print(table.to_pandas().to_markdown())
+        except Exception as e:
+            print(e)
+
+    def do_influxql(self, arg):
+        if self._configurations == {}:
+            print("can't query, no active configs")
+            return
+        try: 
+            table = self.influxdb_client.query(query=arg, language="influxql")
             print(table.to_pandas().to_markdown())
         except Exception as e:
             print(e)
@@ -89,6 +98,9 @@ class IOXCLI(cmd.Cmd):
     def precmd(self, line):
         if line.strip() == 'sql':
             self._run_prompt_loop('(sql >) ', self.do_sql, 'SQL mode')
+            return ''
+        if line.strip() == 'influxql':
+            self._run_prompt_loop('(influxql >) ', self.do_influxql, 'INFLUXQL mode')
             return ''
         if line.strip() == 'write':
             self._run_prompt_loop('(write >) ', self.do_write, 'write mode')
@@ -166,6 +178,8 @@ def parse_args():
 
     sql_parser = subparsers.add_parser('sql', help='execute the given SQL query')
     sql_parser.add_argument('query', metavar='QUERY', nargs='*', action=StoreRemainingInput, help='the SQL query to execute')
+    influxql_parser = subparsers.add_parser('influxql', help='execute the given InfluxQL query')
+    influxql_parser.add_argument('query', metavar='QUERY', nargs='*', action=StoreRemainingInput, help='the INFLUXQL query to execute')
 
     write_parser = subparsers.add_parser('write', help='write line protocol to InfluxDB')
     write_parser.add_argument('line_protocol', metavar='LINE PROTOCOL',  nargs='*', action=StoreRemainingInput, help='the data to write')
@@ -193,6 +207,8 @@ def main():
 
     if args.command == 'sql':
         app.do_sql(args.query)
+    if args.command == 'influxql':
+        app.do_influxql(args.query)
     if args.command == 'write':
         app.do_write(args.line_protocol)
     if args.command == 'write_csv':
