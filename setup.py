@@ -18,13 +18,12 @@ def get_version_from_github_ref():
 
 def get_version():
     # If running in GitHub Actions, get version from GITHUB_REF
+
     version = get_version_from_github_ref()
     if version:
         return version
-
-    # Fallback to a default version if not in GitHub Actions
-    return "v0.0.0"
-
+    else:
+        raise "No version found in GITHUB_REF"
 
 
 setup(
