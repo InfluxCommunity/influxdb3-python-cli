@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 import os
 import re
 
@@ -48,6 +48,5 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
     ],
-    data_files=[('influx3', ['influxdb_cli/influx3.py'])],
     entry_points={'console_scripts': [f"influx3 = influxdb_cli.influx3:main"]},
 )

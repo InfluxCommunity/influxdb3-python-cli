@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 
-import cmd, ast
+import cmd
 import argparse
-import json
 from prompt_toolkit import PromptSession
 from prompt_toolkit.lexers import PygmentsLexer
 from pygments.lexers import SqlLexer
 from influxdb_client_3 import InfluxDBClient3
-import os
 from helper import config_helper
 
 _usage_string = """

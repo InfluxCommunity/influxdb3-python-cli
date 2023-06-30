@@ -6,8 +6,8 @@ class config_helper():
     def __init__(self):
         
         # File path to the config file
-        self.script_path = os.path.dirname(os.path.abspath(__file__))
-        self.config_dir = os.path.join(self.script_path, 'config')
+        self.path = os.path.expanduser("~/Documents")
+        self.config_dir = os.path.join(self.path, 'influxdb3-cli/config')
         self.config_file = os.path.join(self.config_dir, 'config.json')
 
         try: 
@@ -56,6 +56,8 @@ class config_helper():
 
         with open(self.config_file, 'w') as f:
             f.write(json.dumps(self._configuration))
+        
+        print(f"Configuration {args.name} created successfully")
             
         return self._configuration
 
