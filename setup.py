@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 import os
 import re
 
@@ -23,7 +23,7 @@ def get_version():
     if version:
         return version
     else:
-        raise "No version found in GITHUB_REF"
+        return "v0.0.0"
 
 
 setup(
@@ -35,7 +35,7 @@ setup(
     author='InfluxData',
     author_email='contact@influxdata.com',
     url='https://github.com/InfluxCommunity/influxdb-python-cli',
-    packages=['influxdb_cli'],
+    packages=find_packages(),  # Automatically find packages in the current directory
     install_requires=['influxdb3-python', 'pygments', 'prompt_toolkit', 'pandas', 'tabulate'],
     classifiers=[
         'Development Status :: 4 - Beta',

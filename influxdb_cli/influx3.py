@@ -6,7 +6,7 @@ from prompt_toolkit import PromptSession
 from prompt_toolkit.lexers import PygmentsLexer
 from pygments.lexers import SqlLexer
 from influxdb_client_3 import InfluxDBClient3
-from helper import config_helper
+from .helper import config_helper
 
 _usage_string = """
 to write data use influxdb line protocol:
