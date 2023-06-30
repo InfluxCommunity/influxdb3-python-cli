@@ -44,10 +44,10 @@ Python provides the following methods for installing packages within a specific 
 
 To configure the CLI, do _one_ of the following:
 
-- Use the `influx3 config` command to create or modify config--for example:
+- Use the `influx3 create config` command to create or modify config--for example:
 
     ```bash
-    influx3 config \
+    influx3 create config \
     --name="my-config" \
     --database="<database or bucket name>" \
     --host="us-east-1-1.aws.cloud2.influxdata.com" \
@@ -55,21 +55,8 @@ To configure the CLI, do _one_ of the following:
     --org="<your org ID>"
     ```
     
-  The output is the configuration in a `config.json` file.
+  The output is the configuration in a `config.json` file. This is saved within a directory called `config` located with the influx3 application.
 
-- In your editor, create or edit the `config.json` file, and then save it to the directory where you're using the `influx3` command--for example:
-
-    ```json
-    {
-        "my-config": {
-            "database": "your-database",
-            "host": "your-host",
-            "token": "your-token",
-            "org": "your-org-id",
-            "active": true
-        }
-    }
-    ```
 
 If you're running the CLI against InfluxDB Cloud Serverless, replace `your-database` in the examples with your Cloud Serverless _bucket name_.
 
@@ -155,6 +142,65 @@ The following example shows how to write CSV data from the [`./Examples/example.
 ```bash
 influx3 write_csv --file ./Examples/example.csv --measurement table2 --time Date --tags host,region
 ```
+
+## Config Commands
+
+The `config` command allows you to manage configurations for your application. It has the following subcommands: `create`, `update`, `use`, `delete`, and `list`.
+
+### Create
+
+The `create` subcommand creates a new configuration. It requires the `--name`, `--host`, `--token`, `--database`, and `--org` parameters. The `--active` parameter is optional and can be used to set the new configuration as the active one.
+
+Example usage:
+
+```bash
+influx3.py config create --name="my-config" --host="us-east-1-1.aws.cloud2.influxdata.com" --token="<your token>" --database="<database or bucket name>" --org="<your org ID>" --active
+```
+
+### Update
+
+The `update` subcommand updates an existing configuration. The `--name` parameter is required to specify which configuration to update. All other parameters (`--host`, `--token`, `--database`, `--org`, `--active`) are optional.
+
+Example usage:
+
+```bash
+influx3.py config update --name="my-config" --host="new-host.com"
+```
+
+### Use
+
+The `use` subcommand sets a specific configuration as the active one. The `--name` parameter is required to specify which configuration to use.
+
+Example usage:
+
+```bash
+influx3.py config use --name="my-config"
+```
+
+### Delete
+
+The `delete` subcommand deletes a configuration. The `--name` parameter is required to specify which configuration to delete.
+
+Example usage:
+
+```bash
+influx3.py config delete --name="my-config"
+```
+
+### List
+
+The `list` subcommand lists all the configurations.
+
+Example usage:
+
+```bash
+influx3.py config list
+```
+
+Please replace `"my-config"`, `"us-east-1-1.aws.cloud2.influxdata.com"`, `"<your token>"`, `"<database or bucket name>"`, and `"<your org ID>"` with your actual values.
+
+
+
 
 ## Client library
 
