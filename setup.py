@@ -37,7 +37,7 @@ setup(
     author_email='contact@influxdata.com',
     url='https://github.com/InfluxCommunity/influxdb-python-cli',
     packages=['influxdb_cli'],
-    install_requires=['influxdb3-python','pathlib', 'pygments', 'prompt_toolkit', 'pandas', 'tabulate'],
+    install_requires=['influxdb3-python', 'pygments', 'prompt_toolkit', 'pandas', 'tabulate'],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',

@@ -8,6 +8,7 @@ from prompt_toolkit.lexers import PygmentsLexer
 from pygments.lexers import SqlLexer
 from influxdb_client_3 import InfluxDBClient3
 import os
+from config_helper import config_helper
 
 _usage_string = """
 to write data use influxdb line protocol:
@@ -28,13 +29,15 @@ class IOXCLI(cmd.Cmd):
 
     def __init__(self):
         super().__init__()
-        self._configurations = {}
-        self._load_config()
+        self.config_helper = config_helper()
+        self.active_config = self.config_helper._get_active()
+        self._setup_client()
         self._sql_prompt_session = PromptSession(lexer=PygmentsLexer(SqlLexer))
         self._write_prompt_session = PromptSession(lexer=None)
+       
 
     def do_sql(self, arg):
-        if self._configurations == {}:
+        if self.active_config == {}:
             print("can't query, no active configs")
             return
         try: 
@@ -44,7 +47,7 @@ class IOXCLI(cmd.Cmd):
             print(e)
 
     def do_influxql(self, arg):
-        if self._configurations == {}:
+        if self.active_config == {}:
             print("can't query, no active configs")
             return
         try: 
@@ -54,7 +57,7 @@ class IOXCLI(cmd.Cmd):
             print(e)
 
     def do_write(self, arg):
-        if self._configurations == {}:
+        if self.active_config == {}:
             print("can't write, no active configs")
             return
         if arg == "":
@@ -64,7 +67,7 @@ class IOXCLI(cmd.Cmd):
         self.influxdb_client.write(record=arg)
     
     def do_write_csv(self, args):
-        if self._configurations == {}:
+        if self.active_config == {}:
             print("can't write, no active configs")
             return
 
@@ -122,50 +125,39 @@ class IOXCLI(cmd.Cmd):
                 print(f'Ctrl-D pressed, exiting {mode_name}...')
                 break
     
-    def config(self, args):
-        if args.name in self._configurations:
-            config = self._configurations[args.name]
-        else:
-            config = {}
+    def create_config(self, args):
+        self.config_helper._create(args)
 
-        attributes = ['database', 'host', 'token', 'org']
-
-        for attribute in attributes:
-            arg_value = getattr(args, attribute)
-            if arg_value is not None:
-                config[attribute] = arg_value
-
-        config['active'] = True
-
-        missing_attributes = [attribute for attribute in attributes if attribute not in config]
-
-        if missing_attributes:
-            print(f"configuration {args.name} is missing the following required attributes: {missing_attributes}")
-
-        self._configurations[args.name] = config
-        with open('config.json', 'w') as f:
-            f.write(json.dumps(self._configurations))
-        
     
-    def _load_config(self):
-        if not os.path.exists('config.json'):
-            return
-        f = open('config.json', 'r')
+    def delete_config(self, args):
+        self.config_helper._delete(args)
 
-        self._configurations = json.loads(f.read())
-        active_conf = None
-        for c in self._configurations.keys():
-            if self._configurations[c]["active"]:
-                active_conf = self._configurations[c]
-        if active_conf is None:
-            print("no active configuration found")
-        self._database = active_conf['database']
+    
+    def list_config(self, args):
+        self.config_helper._list(args)
+    
+    def use_config(self, args):
+        self.config_helper._set_active(args)
 
-        self.influxdb_client = InfluxDBClient3(host=f"{active_conf['host']}",
-                                                 org=active_conf['org'],
-                                                 token=active_conf['token'],
-                                                 database=active_conf['database']
-                                                 )
+
+    def update_config(self, args):
+        self.config_helper._update(args)
+
+
+        
+    def _setup_client(self):
+        try:
+            self._database = self.active_config['database']
+
+            self.influxdb_client = InfluxDBClient3(
+                host=self.active_config['host'],
+                org=self.active_config['org'],
+                token=self.active_config['token'],
+                database=self.active_config['database']
+            )
+        except Exception as e:
+            print("No active config found, please run 'config' command to create a new config")
+
 
 class StoreRemainingInput(argparse.Action):
     def __call__(self, parser, database, values, option_string=None):
@@ -191,11 +183,33 @@ def parse_args():
     write_csv_parser.add_argument('--tags', help='(optional) array of column names which are tags. Format should be: ["tag1", "tag2"]', required=False)
 
     config_parser = subparsers.add_parser("config", help="configure the application")
-    config_parser.add_argument("--name", help="Configuration name", required=True)
-    config_parser.add_argument("--host", help="Host string")
-    config_parser.add_argument("--token", help="Token string")
-    config_parser.add_argument("--database", help="Database string")
-    config_parser.add_argument("--org", help="Organization string")
+    config_subparsers = config_parser.add_subparsers(dest='config_command')
+
+    create_parser = config_subparsers.add_parser("create", help="create a new configuration")
+    create_parser.add_argument("--name", help="Configuration name", required=True)
+    create_parser.add_argument("--host", help="Host string", required=True)
+    create_parser.add_argument("--token", help="Token string", required=True)
+    create_parser.add_argument("--database", help="Database string", required=True)
+    create_parser.add_argument("--org", help="Organization string", required=True)
+    create_parser.add_argument("--active", help="Set this configuration as active", required=False, action='store_true')
+
+        # Update command
+    update_parser = config_subparsers.add_parser("update", help="update an existing configuration")
+    update_parser.add_argument("--name", help="Configuration name", required=True)
+    update_parser.add_argument("--host", help="Host string", required=False)
+    update_parser.add_argument("--token", help="Token string", required=False)
+    update_parser.add_argument("--database", help="Database string", required=False)
+    update_parser.add_argument("--org", help="Organization string", required=False)
+    update_parser.add_argument("--active", help="Set this configuration as active", required=False, action='store_true')
+
+    # Use command
+    use_parser = config_subparsers.add_parser("use", help="use a specific configuration")
+    use_parser.add_argument("--name", help="Configuration name", required=True)
+
+    delete_parser = config_subparsers.add_parser("delete", help="delete a configuration")
+    delete_parser.add_argument("--name", help="Configuration name", required=True)
+
+    list_parser = config_subparsers.add_parser("list", help="list all configurations")
 
     config_parser = subparsers.add_parser("help")
 
@@ -204,6 +218,7 @@ def parse_args():
 def main():
     args = parse_args()
     app = IOXCLI()
+
 
     if args.command == 'sql':
         app.do_sql(args.query)
@@ -214,7 +229,18 @@ def main():
     if args.command == 'write_csv':
         app.do_write_csv(args)
     if args.command == 'config':
-        app.config(args)
+        if args.config_command == 'create':
+            app.create_config(args)
+        elif args.config_command == 'delete':
+            app.delete_config(args)
+        elif args.config_command == 'list':
+            app.list_config(args)
+        elif args.config_command == 'update':
+            app.update_config(args)
+        elif args.config_command == 'use':
+            app.use_config(args)
+        else:
+             print(_usage_string)
     if args.command == 'help':
         print(_usage_string)
     if args.command is None:
