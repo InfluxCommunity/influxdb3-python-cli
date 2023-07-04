@@ -7,7 +7,8 @@ from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.lexers import PygmentsLexer
 from pygments.lexers import SqlLexer
 from influxdb_client_3 import InfluxDBClient3
-from helper import config_helper
+from .helper import config_helper
+from .openai_helper import OpenAIHelper
 
 _usage_string = """
 to write data use influxdb line protocol:
@@ -23,7 +24,7 @@ to enter interactive mode:
 _description_string = 'CLI application for Querying IOx with arguments and interactive mode.'
 
 class IOXCLI(cmd.Cmd):
-    intro = 'Welcome to my IOx CLI.\n'
+    intro = 'InfluxDB 3.0 CLI.\n'
     prompt = '(>) '
 
     def __init__(self):
@@ -137,6 +138,16 @@ class IOXCLI(cmd.Cmd):
         'Exit the shell with Ctrl-D'
         return self.do_exit(arg)
 
+    def do_chatgpt(self, arg):
+        if arg == "":
+            print("can't write, no line protocol supplied")
+            return
+        openai_helper = OpenAIHelper()
+        query = openai_helper.nl_to_sql(arg)
+        print(f"Run InfluxQL query: {query}")
+        self.do_query(query, language='influxql')
+        
+
  
     def precmd(self, line):
         if line.strip() == 'sql':
@@ -147,6 +158,9 @@ class IOXCLI(cmd.Cmd):
             return ''
         if line.strip() == 'write':
             self._run_prompt_loop('(write >) ', self.do_write, 'write mode')
+            return ''
+        if line.strip() == 'chatgpt':
+            self._run_prompt_loop('(chatgpt >) ', self.do_chatgpt, 'chatgpt mode')
             return ''
         return line
 
@@ -213,6 +227,9 @@ def parse_args():
     influxql_parser = subparsers.add_parser('influxql', help='execute the given InfluxQL query')
     influxql_parser.add_argument('query', metavar='QUERY', nargs='*', action=StoreRemainingInput, help='the INFLUXQL query to execute')
 
+    chatgpt_parser = subparsers.add_parser('chatgpt', help='execute the given chatgpt statement')
+    chatgpt_parser.add_argument('query', metavar='QUERY', nargs='*', action=StoreRemainingInput, help='the chatgpt query to execute')
+
     write_parser = subparsers.add_parser('write', help='write line protocol to InfluxDB')
     write_parser.add_argument('line_protocol', metavar='LINE PROTOCOL',  nargs='*', action=StoreRemainingInput, help='the data to write')
 
@@ -261,9 +278,11 @@ def main():
 
 
     if args.command == 'sql':
-        app.query(args.query, language='sql')
+        app.do_query(args.query, language='sql')
     if args.command == 'influxql':
-        app.query(args.query, language='influxql')
+        app.do_query(args.query, language='influxql')
+    if args.command == 'chatgpt':
+        app.do_chatgpt(args.query)
     if args.command == 'write':
         app.do_write(args.line_protocol)
     if args.command == 'write_csv':
