@@ -3,10 +3,11 @@
 import cmd
 import argparse
 from prompt_toolkit import PromptSession
+from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.lexers import PygmentsLexer
 from pygments.lexers import SqlLexer
 from influxdb_client_3 import InfluxDBClient3
-from .helper import config_helper
+from helper import config_helper
 
 _usage_string = """
 to write data use influxdb line protocol:
@@ -26,7 +27,7 @@ class IOXCLI(cmd.Cmd):
     prompt = '(>) '
 
     def __init__(self):
-        super().__init__()
+        super(IOXCLI, self).__init__()
         self.config_helper = config_helper()
         self.active_config = self.config_helper._get_active()
         self._setup_client()
@@ -34,25 +35,66 @@ class IOXCLI(cmd.Cmd):
         self._write_prompt_session = PromptSession(lexer=None)
        
 
-    def do_sql(self, arg):
-        if self.active_config == {}:
-            print("can't query, no active configs")
-            return
-        try: 
-            table = self.influxdb_client.query(query=arg, language="sql")
-            print(table.to_pandas().to_markdown())
-        except Exception as e:
-            print(e)
+    
 
-    def do_influxql(self, arg):
+    def do_query(self, arg, language):
         if self.active_config == {}:
             print("can't query, no active configs")
             return
-        try: 
-            table = self.influxdb_client.query(query=arg, language="influxql")
-            print(table.to_pandas().to_markdown())
+        
+        # Retrieve the iterator
+        reader = self._query_chunks(arg, language)
+
+        if reader is None:
+            return
+
+        # Create custom key bindings
+        bindings = KeyBindings()
+
+        # Flag to determine if there is more data
+        has_more_data = True
+
+        # Bind the 'tab' key
+        @bindings.add('tab')
+        def _(event):
+            nonlocal has_more_data
+            if has_more_data:
+                try:
+                    batch, buff = reader.read_chunk()
+                    print(batch.to_pandas().to_markdown())
+                except StopIteration:
+                    print("End of data. Press Enter to continue.")
+                    has_more_data = False
+                except Exception as e:
+                    print(e)
+                    has_more_data = False
+
+        # Create a session with the bindings
+        session = PromptSession(key_bindings=bindings)
+        try:
+            batch, buff = reader.read_chunk()
+            print(batch.to_pandas().to_markdown())
+        except StopIteration:
+            print("End of data. Press Enter to continue.")
+            has_more_data = False
+  
+        while True:
+            try:
+                if not has_more_data:
+                    break
+                # Prompt loop to capture key presses
+                print("Press TAB to fetch next chunk of data")
+                session.prompt()
+            except KeyboardInterrupt:
+                break
+    
+    def _query_chunks(self, arg, language):
+        try:
+            table = self.influxdb_client.query(query=arg, language=language, mode="chunk")
+            return table
         except Exception as e:
             print(e)
+            return None
 
     def do_write(self, arg):
         if self.active_config == {}:
@@ -98,10 +140,10 @@ class IOXCLI(cmd.Cmd):
  
     def precmd(self, line):
         if line.strip() == 'sql':
-            self._run_prompt_loop('(sql >) ', self.do_sql, 'SQL mode')
+            self._run_prompt_loop('(sql >) ', lambda arg: self.do_query(arg, language='sql'), 'SQL mode')
             return ''
         if line.strip() == 'influxql':
-            self._run_prompt_loop('(influxql >) ', self.do_influxql, 'INFLUXQL mode')
+            self._run_prompt_loop('(influxql >) ', lambda arg: self.do_query(arg, language='influxql'), 'INFLUXQL mode')
             return ''
         if line.strip() == 'write':
             self._run_prompt_loop('(write >) ', self.do_write, 'write mode')
@@ -219,9 +261,9 @@ def main():
 
 
     if args.command == 'sql':
-        app.do_sql(args.query)
+        app.query(args.query, language='sql')
     if args.command == 'influxql':
-        app.do_influxql(args.query)
+        app.query(args.query, language='influxql')
     if args.command == 'write':
         app.do_write(args.line_protocol)
     if args.command == 'write_csv':
