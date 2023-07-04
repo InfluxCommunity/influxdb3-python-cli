@@ -55,7 +55,7 @@ To configure the CLI, do _one_ of the following:
     --org="<your org ID>"
     ```
     
-  The output is the configuration in a `config.json` file. This is saved within a directory called `config` located with the influx3 application.
+  The output is the configuration in a `config.json` file. This is saved within a directory called `config` located within your `Documents` folder.
 
 
 If you're running the CLI against InfluxDB Cloud Serverless, replace `your-database` in the examples with your Cloud Serverless _bucket name_.
@@ -199,7 +199,23 @@ influx3.py config list
 
 Please replace `"my-config"`, `"us-east-1-1.aws.cloud2.influxdata.com"`, `"<your token>"`, `"<database or bucket name>"`, and `"<your org ID>"` with your actual values.
 
+## (Beta) OpenAI (ChatGPT) Support
+The CLI also contians a beta feature that allows you to query your data using OpenAI's ChatGPT. To use this feature, you must have an OpenAI API key. You can get one by signing up for the [OpenAI waitlist](https://share.hsforms.com/1Lfc7WtPLRk2ppXhPjcYY-A4sk30). Once you have an API key, you can set it as an environment variable called `OPENAI_API_KEY`.
 
+To use this feature, you can use the `chatgpt` command:
+```
+export OPENAI_API_KEY=sk-o2Sbq3aVBp
+
+influx3 chatgpt get average vibration grouped by machineID from machine_data
+Run InfluxQL query: SELECT MEAN(vibration) AS avg_vibration FROM machine_data GROUP BY machineID
+|    | iox::measurement   | time                | machineID   |   avg_vibration |
+|---:|:-------------------|:--------------------|:------------|----------------:|
+|  0 | machine_data       | 1970-01-01 00:00:00 | machine1    |         85.2356 |
+|  1 | machine_data       | 1970-01-01 00:00:00 | machine2    |        190.273  |
+|  2 | machine_data       | 1970-01-01 00:00:00 | machine3    |         85.4789 |
+Press TAB to fetch next chunk of data
+
+```
 
 
 ## Client library

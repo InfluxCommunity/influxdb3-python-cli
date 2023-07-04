@@ -36,7 +36,7 @@ setup(
     author_email='contact@influxdata.com',
     url='https://github.com/InfluxCommunity/influxdb-python-cli',
     packages=find_packages(),  # Automatically find packages in the current directory
-    install_requires=['influxdb3-python', 'pygments', 'prompt_toolkit', 'pandas', 'tabulate'],
+    install_requires=['influxdb3-python', 'pygments', 'prompt_toolkit', 'pandas', 'tabulate', 'openai'],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
