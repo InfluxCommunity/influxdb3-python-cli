@@ -7,8 +7,8 @@ from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.lexers import PygmentsLexer
 from pygments.lexers import SqlLexer
 from influxdb_client_3 import InfluxDBClient3
-from .helper import config_helper
-from .openai_helper import OpenAIHelper
+from helper import config_helper
+from openai_helper import OpenAIHelper
 
 _usage_string = """
 to write data use influxdb line protocol:
@@ -107,7 +107,7 @@ class IOXCLI(cmd.Cmd):
         
         self.influxdb_client.write(record=arg)
     
-    def do_write_csv(self, args):
+    def do_write_file(self, args):
         if self.active_config == {}:
             print("can't write, no active configs")
             return
@@ -122,12 +122,27 @@ class IOXCLI(cmd.Cmd):
                 temp[attribute] = arg_value
         if isinstance(temp['tags'], str):
             temp['tags'] =  temp['tags'].split(',')
+        
 
-
-        self.influxdb_client.write_csv(csv_file=temp['file'], 
+        if 'measurement' in temp:
+            try:
+                self.influxdb_client.write_file(file=temp['file'], 
                                        measurement_name=temp['measurement'], 
                                        timestamp_column=temp['time'], 
                                        tag_columns=temp['tags'])
+                
+            except Exception as e:
+                print(e)
+        else:
+            print("measurement not specified. Attempting to find measurement in file...")
+            try:
+                self.influxdb_client.write_file(file=temp['file'], 
+                                       timestamp_column=temp['time'], 
+                                       tag_columns=temp['tags'])
+                
+            except Exception as e:
+                print(e)
+                
 
     def do_exit(self, arg):
         'Exit the shell: exit'
@@ -233,11 +248,11 @@ def parse_args():
     write_parser = subparsers.add_parser('write', help='write line protocol to InfluxDB')
     write_parser.add_argument('line_protocol', metavar='LINE PROTOCOL',  nargs='*', action=StoreRemainingInput, help='the data to write')
 
-    write_csv_parser = subparsers.add_parser('write_csv', help='write CSV data to InfluxDB')
-    write_csv_parser.add_argument('--file', help='the CSV file to import', required=True)
-    write_csv_parser.add_argument('--measurement', help='Define the name of the measurement', required=True)
-    write_csv_parser.add_argument('--time', help='Define the name of the time column with the csv file', required=True)
-    write_csv_parser.add_argument('--tags', help='(optional) array of column names which are tags. Format should be: ["tag1", "tag2"]', required=False)
+    write_file_parser = subparsers.add_parser('write_file', help='write data from file to InfluxDB')
+    write_file_parser.add_argument('--file', help='the file to import', required=True)
+    write_file_parser.add_argument('--measurement', help='Define the name of the measurement', required=False)
+    write_file_parser.add_argument('--time', help='Define the name of the time column within the file', required=True)
+    write_file_parser.add_argument('--tags', help='(optional) array of column names which are tags. Format should be: ["tag1", "tag2"]', required=False)
 
     config_parser = subparsers.add_parser("config", help="configure the application")
     config_subparsers = config_parser.add_subparsers(dest='config_command')
@@ -285,8 +300,8 @@ def main():
         app.do_chatgpt(args.query)
     if args.command == 'write':
         app.do_write(args.line_protocol)
-    if args.command == 'write_csv':
-        app.do_write_csv(args)
+    if args.command == 'write_file':
+        app.do_write_file(args)
     if args.command == 'config':
         if args.config_command == 'create':
             app.create_config(args)
