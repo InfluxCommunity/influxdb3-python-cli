@@ -124,7 +124,7 @@ To exit a prompt, enter `exit`.
 
 ## Write from a file
 
-The InfluxDB CLI and client library can write data from a CSV file.
+The InfluxDB CLI and client library can write data from CSV, JSON, ORC, Parquet and Feather files.
 The CSV file must contain the following:
 
 - A header row with column names
@@ -132,15 +132,15 @@ The CSV file must contain the following:
 
 The following CLI options specify how data is parsed:
 
-* `--file` - The path to the csv file.
+* `--file` - The path to the file.
 * `--time` - The name of the column containing the timestamp.
-* `--measurement` - The name of the measurment to store the CSV data under. (Currently only supports user specified string)
-* `--tags` - (optional) Specify an array of column names to use as tags. (Currently only supports user specified strings) for example: `--tags=host,region`
+* `--measurement` - The name of the measurement to store the data under. (Optional, will look for a measurement column in data otherwise).
+* `--tags` - (optional) Specify an array of column names to use as tags. (Currently only supports user-specified strings) for example: `--tags=host,region`
 
 The following example shows how to write CSV data from the [`./Examples/example.csv` file](https://github.com/InfluxCommunity/influxdb3-python/blob/main/Examples/example.csv) to InfluxDB (as line protocol):
 
 ```bash
-influx3 write_csv --file ./Examples/example.csv --measurement table2 --time Date --tags host,region
+influx3 write_file --file ./Examples/example.csv --measurement table2 --time Date --tags host,region
 ```
 
 ## Config Commands
