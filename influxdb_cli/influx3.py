@@ -7,8 +7,9 @@ from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.lexers import PygmentsLexer
 from pygments.lexers import SqlLexer
 from influxdb_client_3 import InfluxDBClient3
-from helper import config_helper
-from openai_helper import OpenAIHelper
+from .helper import config_helper
+from .openai_helper import OpenAIHelper
+from .file_writer import FileWriter
 
 _usage_string = """
 to write data use influxdb line protocol:
@@ -48,8 +49,8 @@ class IOXCLI(cmd.Cmd):
 
         if reader is None:
             return
-
-        # Create custom key bindings
+        
+                # Create custom key bindings
         bindings = KeyBindings()
 
         # Flag to determine if there is more data
@@ -70,6 +71,20 @@ class IOXCLI(cmd.Cmd):
                     print(e)
                     has_more_data = False
 
+        # Bind the 'f' key
+        @bindings.add('f')
+        def _(event):
+            nonlocal batch
+            try:
+                # Prompt the user for a file name
+                file_name = input("Enter the file name with full path (e.g. /home/user/sample.json): ")
+                # Save the current batch of data to the specified file
+                wf = FileWriter()
+                wf.write_file(name=file_name, d=batch)
+                print(f"Data saved to {file_name}.")
+            except Exception as e:
+                print(f"An error occurred while saving the file: {e}")
+
         # Create a session with the bindings
         session = PromptSession(key_bindings=bindings)
         try:
@@ -78,16 +93,18 @@ class IOXCLI(cmd.Cmd):
         except StopIteration:
             print("End of data. Press Enter to continue.")
             has_more_data = False
-  
+
         while True:
             try:
                 if not has_more_data:
                     break
                 # Prompt loop to capture key presses
-                print("Press TAB to fetch next chunk of data")
+                print("Press TAB to fetch next chunk of data, or F to save current chunk to a file")
                 session.prompt()
             except KeyboardInterrupt:
                 break
+
+
     
     def _query_chunks(self, arg, language):
         try:
