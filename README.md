@@ -199,7 +199,7 @@ influx3.py config list
 
 Please replace `"my-config"`, `"us-east-1-1.aws.cloud2.influxdata.com"`, `"<your token>"`, `"<database or bucket name>"`, and `"<your org ID>"` with your actual values.
 
-## (Beta) OpenAI (ChatGPT) Support
+## (Alpha) OpenAI (ChatGPT) Support
 The CLI also contians a beta feature that allows you to query your data using OpenAI's ChatGPT. To use this feature, you must have an OpenAI API key. You can get one by signing up for the [OpenAI waitlist](https://share.hsforms.com/1Lfc7WtPLRk2ppXhPjcYY-A4sk30). Once you have an API key, you can set it as an environment variable called `OPENAI_API_KEY`.
 
 To use this feature, you can use the `chatgpt` command:
